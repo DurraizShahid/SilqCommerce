@@ -3,11 +3,13 @@ import { useParams, Link } from 'react-router-dom';
 import { products } from '@/data/dummyData';
 import { H1, P, Large, Muted } from '@/components/ui/typography';
 import { Button } from '@/components/ui/button';
+import { useCart } from '@/context/CartContext'; // Import useCart hook
 import { toast } from 'sonner';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const product = products.find((p) => p.id === id);
+  const { addToCart } = useCart(); // Use addToCart from context
 
   if (!product) {
     return (
@@ -26,8 +28,7 @@ const ProductDetailPage: React.FC = () => {
   }
 
   const handleAddToCart = () => {
-    toast.success(`${product.name} added to cart!`);
-    // In a real app, you would add this to a global state/context for the cart
+    addToCart(product); // Add product to cart using context function
   };
 
   return (
