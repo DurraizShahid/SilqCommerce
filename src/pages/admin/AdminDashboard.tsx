@@ -1,14 +1,25 @@
 import React from 'react';
-import { H1, P, H2 } from '@/components/ui/typography';
+import { H1, P, H2, Muted } from '@/components/ui/typography';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { orders, products } from '@/data/dummyData';
-import { Package, ListOrdered, Users } from 'lucide-react';
+import { Package, ListOrdered, DollarSign, Users } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const AdminDashboard: React.FC = () => {
   const totalProducts = products.length;
   const totalOrders = orders.length;
   const pendingOrders = orders.filter(order => order.status === 'Pending').length;
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+
+  const stockData = products.map(product => ({
+    name: product.name,
+    stock: product.stock,
+  }));
+
+  const recentOrders = orders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()).slice(0, 5);
 
   return (
     <div className="space-y-8">
@@ -57,7 +68,7 @@ const AdminDashboard: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" /> {/* Using Users as a placeholder for now */}
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
@@ -68,26 +79,68 @@ const AdminDashboard: React.FC = () => {
         </Card>
       </div>
 
-      <section className="space-y-6">
-        <H2>Recent Orders</H2>
-        {/* Placeholder for a table of recent orders */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardContent className="p-4">
-            <P className="text-muted-foreground">
-              Detailed recent orders will appear here.
-            </P>
+          <CardHeader>
+            <CardTitle>Recent Orders</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order ID</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentOrders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">{order.id}</TableCell>
+                    <TableCell>{order.customerName}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                        order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
+                        order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <div className="text-right mt-4">
+              <Link to="/admin/orders">
+                <Button variant="link" className="text-accent-gold hover:text-accent-gold/80">View All Orders</Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
-      </section>
 
-      <section className="space-y-6">
-        <H2>Product Stock Levels</H2>
-        {/* Placeholder for a table of product stock levels */}
         <Card>
-          <CardContent className="p-4">
-            <P className="text-muted-foreground">
-              Product stock information will appear here.
-            </P>
+          <CardHeader>
+            <CardTitle>Product Stock Levels</CardTitle>
+          </CardHeader>
+          <CardContent className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stockData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} style={{ fontSize: '12px' }} />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="stock" fill="hsl(var(--accent-gold))" />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="text-right mt-4">
+              <Link to="/admin/products">
+                <Button variant="link" className="text-accent-gold hover:text-accent-gold/80">Manage Products</Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </section>
