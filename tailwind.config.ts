@@ -62,6 +62,10 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "accent-gold": {
+          DEFAULT: "#B8860B", // DarkGoldenrod
+          foreground: "#FFFFFF",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
