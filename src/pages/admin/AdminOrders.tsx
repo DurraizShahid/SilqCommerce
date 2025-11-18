@@ -1,20 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { H1, P, Muted } from '@/components/ui/typography';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { orders } from '@/data/dummyData';
+import { orders as initialOrders } from '@/data/dummyData';
 import { Eye, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import OrderDetailsDialog from '@/components/OrderDetailsDialog';
+import { Order } from '@/data/dummyData';
 
 const AdminOrders: React.FC = () => {
+  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
   const handleView = (orderId: string) => {
-    toast.info(`Viewing order ${orderId}`);
-    // Implement actual view logic (e.g., open a detailed order modal)
+    const orderToView = orders.find((o) => o.id === orderId);
+    if (orderToView) {
+      setSelectedOrder(orderToView);
+      setIsDetailsOpen(true);
+    }
   };
 
-  const handleUpdateStatus = (orderId: string, newStatus: string) => {
-    toast.success(`Order ${orderId} status updated to ${newStatus}`);
-    // Implement actual status update logic
+  const handleUpdateStatus = (orderId: string, newStatus: Order['status']) => {
+    setOrders(
+      orders.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+    toast.success(`Order ${orderId} status updated to ${newStatus}!`);
   };
 
   return (
@@ -73,6 +86,12 @@ const AdminOrders: React.FC = () => {
           </TableBody>
         </Table>
       </div>
+
+      <OrderDetailsDialog
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        order={selectedOrder}
+      />
     </div>
   );
 };

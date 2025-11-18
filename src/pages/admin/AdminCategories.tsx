@@ -1,27 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { H1, P } from '@/components/ui/typography';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { categories } from '@/data/dummyData';
+import { categories as initialCategories } from '@/data/dummyData';
 import { Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import CategoryForm from '@/components/CategoryForm';
+import { Category } from '@/data/dummyData';
 
 const AdminCategories: React.FC = () => {
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | undefined>(undefined);
+
+  const handleAddCategory = () => {
+    setEditingCategory(undefined);
+    setIsFormOpen(true);
+  };
+
   const handleEdit = (categoryId: string) => {
-    toast.info(`Editing category ${categoryId}`);
-    // Implement actual edit logic
+    const categoryToEdit = categories.find((c) => c.id === categoryId);
+    if (categoryToEdit) {
+      setEditingCategory(categoryToEdit);
+      setIsFormOpen(true);
+    }
   };
 
   const handleDelete = (categoryId: string) => {
-    toast.error(`Deleting category ${categoryId}`);
-    // Implement actual delete logic
+    setCategories(categories.filter((c) => c.id !== categoryId));
+    toast.error(`Category deleted successfully!`);
+  };
+
+  const handleSaveCategory = (category: Category) => {
+    if (category.id && categories.some(c => c.id === category.id)) {
+      // Edit existing category
+      setCategories(categories.map((c) => (c.id === category.id ? category : c)));
+      toast.success(`Category "${category.name}" updated successfully!`);
+    } else {
+      // Add new category
+      setCategories([...categories, { ...category, id: `cat-${Date.now()}` }]);
+      toast.success(`Category "${category.name}" added successfully!`);
+    }
   };
 
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <H1 className="mb-0">Categories Management</H1>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Add New Category</Button>
+        <Button onClick={handleAddCategory} className="bg-primary text-primary-foreground hover:bg-primary/90">Add New Category</Button>
       </div>
       <P className="text-lg text-muted-foreground">
         Organize your products into categories.
@@ -54,6 +80,13 @@ const AdminCategories: React.FC = () => {
           </TableBody>
         </Table>
       </div>
+
+      <CategoryForm
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        category={editingCategory}
+        onSave={handleSaveCategory}
+      />
     </div>
   );
 };

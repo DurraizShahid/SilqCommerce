@@ -1,27 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { H1, P, Muted } from '@/components/ui/typography';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { products } from '@/data/dummyData';
+import { products as initialProducts, categories } from '@/data/dummyData';
 import { Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import ProductForm from '@/components/ProductForm';
+import { Product } from '@/data/dummyData';
 
 const AdminProducts: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
+
+  const handleAddProduct = () => {
+    setEditingProduct(undefined);
+    setIsFormOpen(true);
+  };
+
   const handleEdit = (productId: string) => {
-    toast.info(`Editing product ${productId}`);
-    // Implement actual edit logic (e.g., open a form)
+    const productToEdit = products.find((p) => p.id === productId);
+    if (productToEdit) {
+      setEditingProduct(productToEdit);
+      setIsFormOpen(true);
+    }
   };
 
   const handleDelete = (productId: string) => {
-    toast.error(`Deleting product ${productId}`);
-    // Implement actual delete logic (e.g., show confirmation dialog, then delete)
+    setProducts(products.filter((p) => p.id !== productId));
+    toast.error(`Product deleted successfully!`);
+  };
+
+  const handleSaveProduct = (product: Product) => {
+    if (product.id && products.some(p => p.id === product.id)) {
+      // Edit existing product
+      setProducts(products.map((p) => (p.id === product.id ? product : p)));
+      toast.success(`Product "${product.name}" updated successfully!`);
+    } else {
+      // Add new product
+      setProducts([...products, { ...product, id: `prod-${Date.now()}` }]);
+      toast.success(`Product "${product.name}" added successfully!`);
+    }
   };
 
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <H1 className="mb-0">Products Management</H1>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Add New Product</Button>
+        <Button onClick={handleAddProduct} className="bg-primary text-primary-foreground hover:bg-primary/90">Add New Product</Button>
       </div>
       <P className="text-lg text-muted-foreground">
         Manage your store's product catalog.
@@ -62,6 +88,14 @@ const AdminProducts: React.FC = () => {
           </TableBody>
         </Table>
       </div>
+
+      <ProductForm
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        product={editingProduct}
+        onSave={handleSaveProduct}
+        categories={categories}
+      />
     </div>
   );
 };
