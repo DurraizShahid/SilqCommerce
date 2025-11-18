@@ -2,11 +2,16 @@ import { MadeWithDyad } from "@/components/made-with-dyad";
 import { H1, P, H2 } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { products } from "@/data/dummyData";
+import { products, categories } from "@/data/dummyData";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Index = () => {
   const featuredProducts = products.slice(0, 3); // Get first 3 products as featured
+
+  const getCategoryImageUrl = (categoryName: string) => {
+    const product = products.find(p => p.category === categoryName);
+    return product ? product.imageUrl : 'https://via.placeholder.com/400x300?text=Category';
+  };
 
   return (
     <div className="space-y-16">
@@ -68,6 +73,37 @@ const Index = () => {
         <Link to="/products">
           <Button variant="outline" className="mt-8 border-accent-gold text-accent-gold hover:bg-accent-gold hover:text-accent-gold-foreground text-lg px-8 py-6">
             View All Products
+          </Button>
+        </Link>
+      </section>
+
+      {/* Category Browsing Section */}
+      <section className="text-center space-y-8">
+        <H2 className="text-4xl font-bold">Shop by Category</H2>
+        <P className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Find exactly what you're looking for.
+        </P>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categories.map((category) => (
+            <Link to={`/products?category=${category.name}`} key={category.id}>
+              <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer">
+                <div className="relative w-full h-60 overflow-hidden">
+                  <img
+                    src={getCategoryImageUrl(category.name)}
+                    alt={category.name}
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                  />
+                </div>
+                <CardHeader className="flex-grow text-center">
+                  <CardTitle className="text-2xl font-semibold">{category.name}</CardTitle>
+                </CardHeader>
+              </Card>
+            </Link>
+          ))}
+        </div>
+        <Link to="/categories">
+          <Button variant="outline" className="mt-8 border-accent-gold text-accent-gold hover:bg-accent-gold hover:text-accent-gold-foreground text-lg px-8 py-6">
+            View All Categories
           </Button>
         </Link>
       </section>
