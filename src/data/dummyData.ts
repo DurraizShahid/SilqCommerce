@@ -1,3 +1,17 @@
+export interface ProductVariant {
+  id: string;
+  name: string;
+  value: string;
+  priceModifier?: number; // Optional price adjustment for variant
+  stock: number;
+}
+
+export interface ProductVariation {
+  type: 'size' | 'color' | 'material' | 'style';
+  name: string;
+  options: ProductVariant[];
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -6,6 +20,19 @@ export interface Product {
   imageUrl: string;
   category: string;
   stock: number;
+  variations?: ProductVariation[];
+  isNew?: boolean;
+  isTrending?: boolean;
+  views?: number;
+  createdAt?: string;
+  vendorId?: string;
+  videoUrl?: string;
+  images?: string[]; // Multiple product images
+  isSubscription?: boolean;
+  subscriptionFrequency?: 'weekly' | 'bi-weekly' | 'monthly' | 'quarterly';
+  isPreOrder?: boolean;
+  preOrderReleaseDate?: string;
+  preOrderDeposit?: number;
 }
 
 export interface Category {
@@ -21,6 +48,134 @@ export interface Order {
   total: number;
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   orderDate: string;
+  shippingAddress?: {
+    fullName: string;
+    address: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    phone: string;
+  };
+  shippingMethod?: 'standard' | 'express';
+  trackingNumber?: string;
+  estimatedDelivery?: string;
+  vendorId?: string;
+  vendorName?: string;
+}
+
+export interface ProductBundle {
+  id: string;
+  name: string;
+  description: string;
+  products: Product[];
+  bundlePrice: number;
+  discount: number; // percentage
+  imageUrl: string;
+  category: string;
+}
+
+export interface Vendor {
+  id: string;
+  name: string;
+  description: string;
+  logoUrl: string;
+  coverImageUrl?: string;
+  email: string;
+  phone?: string;
+  website?: string;
+  location?: string;
+  joinedDate: string;
+  isVerified: boolean;
+  isPremium: boolean;
+  rating: number;
+  totalReviews: number;
+  totalProducts: number;
+  totalSales: number;
+  badges: string[];
+  categories: string[];
+  socialLinks?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+  };
+}
+
+export interface VendorReview {
+  id: string;
+  vendorId: string;
+  customerId: string;
+  customerName: string;
+  customerAvatar?: string;
+  rating: number;
+  title: string;
+  comment: string;
+  isVerifiedPurchase: boolean;
+  createdAt: string;
+  helpfulCount: number;
+  images?: string[];
+}
+
+export interface Subscription {
+  id: string;
+  productId: string;
+  productName: string;
+  customerId: string;
+  frequency: 'weekly' | 'bi-weekly' | 'monthly' | 'quarterly';
+  quantity: number;
+  startDate: string;
+  nextDeliveryDate: string;
+  status: 'active' | 'paused' | 'cancelled';
+  price: number;
+}
+
+export interface PreOrder {
+  id: string;
+  productId: string;
+  productName: string;
+  customerId: string;
+  quantity: number;
+  expectedReleaseDate: string;
+  depositAmount: number;
+  totalAmount: number;
+  status: 'pending' | 'confirmed' | 'shipped' | 'cancelled';
+  createdAt: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  customerId: string;
+  subject: string;
+  category: 'order' | 'product' | 'shipping' | 'payment' | 'return' | 'other';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: 'open' | 'in-progress' | 'resolved' | 'closed';
+  messages: SupportMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SupportMessage {
+  id: string;
+  ticketId: string;
+  senderId: string;
+  senderName: string;
+  senderType: 'customer' | 'support' | 'vendor';
+  content: string;
+  attachments?: string[];
+  createdAt: string;
+}
+
+export interface ReturnRequest {
+  id: string;
+  orderId: string;
+  productId: string;
+  productName: string;
+  customerId: string;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected' | 'refunded' | 'completed';
+  requestedAt: string;
+  refundAmount: number;
+  trackingNumber?: string;
 }
 
 export const categories: Category[] = [
@@ -40,6 +195,10 @@ export const products: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1581044777550-4cfa607037dc?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     category: 'Dresses',
     stock: 15,
+    isTrending: true,
+    isNew: false,
+    views: 1250,
+    createdAt: '2023-09-15',
   },
   {
     id: 'prod2',
@@ -49,6 +208,10 @@ export const products: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1551028150-64b9f39646e2?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     category: 'Outerwear',
     stock: 10,
+    isTrending: true,
+    isNew: true,
+    views: 890,
+    createdAt: '2023-11-01',
   },
   {
     id: 'prod3',
@@ -58,6 +221,20 @@ export const products: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1566150921091-c45160e80d98?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     category: 'Bags',
     stock: 25,
+    isTrending: false,
+    isNew: false,
+    views: 450,
+    createdAt: '2023-08-20',
+    variations: [
+      {
+        type: 'color',
+        name: 'Color',
+        options: [
+          { id: 'v1', name: 'Black', value: 'black', stock: 15, priceModifier: 0 },
+          { id: 'v2', name: 'Brown', value: 'brown', stock: 10, priceModifier: 0 },
+        ],
+      },
+    ],
   },
   {
     id: 'prod4',
@@ -67,6 +244,9 @@ export const products: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1542272604-786c3c2739b7?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     category: 'Outerwear',
     stock: 20,
+    vendorId: 'vendor1',
+    isSubscription: true,
+    subscriptionFrequency: 'monthly',
   },
   {
     id: 'prod5',
@@ -121,6 +301,181 @@ export const products: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1594633313472-f5074a57197e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     category: 'Dresses', // Could be 'Bottoms'
     stock: 15,
+  },
+  {
+    id: 'prod-new-1',
+    name: 'Limited Edition Winter Collection',
+    description: 'Exclusive limited edition winter collection. Pre-order now to secure your piece.',
+    price: 299.99,
+    imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop',
+    category: 'Dresses',
+    stock: 0,
+    isPreOrder: true,
+    preOrderReleaseDate: '2023-12-15',
+    preOrderDeposit: 50.00,
+    vendorId: 'vendor1',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder video URL
+  },
+];
+
+export const vendors: Vendor[] = [
+  {
+    id: 'vendor1',
+    name: 'Luxury Fashion House',
+    description: 'Curated luxury fashion from around the world. Specializing in haute couture and designer pieces.',
+    logoUrl: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?q=80&w=2070&auto=format&fit=crop',
+    coverImageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop',
+    email: 'contact@luxuryfashion.com',
+    website: 'https://luxuryfashion.com',
+    location: 'Paris, France',
+    joinedDate: '2023-01-15',
+    isVerified: true,
+    isPremium: true,
+    rating: 4.8,
+    totalReviews: 245,
+    totalProducts: 156,
+    totalSales: 12450,
+    badges: ['Verified', 'Premium', 'Top Seller'],
+    categories: ['Dresses', 'Outerwear', 'Accessories'],
+    socialLinks: {
+      instagram: '@luxuryfashion',
+      facebook: 'luxuryfashionhouse',
+    },
+  },
+  {
+    id: 'vendor2',
+    name: 'Elegant Essentials',
+    description: 'Minimalist luxury for the modern wardrobe. Quality over quantity.',
+    logoUrl: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=2070&auto=format&fit=crop',
+    email: 'hello@elegantessentials.com',
+    location: 'New York, USA',
+    joinedDate: '2023-03-20',
+    isVerified: true,
+    isPremium: false,
+    rating: 4.6,
+    totalReviews: 189,
+    totalProducts: 89,
+    totalSales: 8920,
+    badges: ['Verified'],
+    categories: ['Outerwear', 'Accessories'],
+  },
+];
+
+export const vendorReviews: VendorReview[] = [
+  {
+    id: 'review1',
+    vendorId: 'vendor1',
+    customerId: 'customer1',
+    customerName: 'Sarah Johnson',
+    rating: 5,
+    title: 'Exceptional quality and service',
+    comment: 'The dress I ordered was absolutely stunning. The quality exceeded my expectations and shipping was fast.',
+    isVerifiedPurchase: true,
+    createdAt: '2023-10-15',
+    helpfulCount: 12,
+  },
+  {
+    id: 'review2',
+    vendorId: 'vendor1',
+    customerId: 'customer2',
+    customerName: 'Michael Chen',
+    rating: 4,
+    title: 'Great product, minor issue',
+    comment: 'Love the coat, but it arrived a day later than expected. Still very happy with the purchase.',
+    isVerifiedPurchase: true,
+    createdAt: '2023-10-20',
+    helpfulCount: 5,
+  },
+];
+
+export const subscriptions: Subscription[] = [
+  {
+    id: 'sub1',
+    productId: 'prod4',
+    productName: 'Chunky Knit Sweater',
+    customerId: 'customer1',
+    frequency: 'monthly',
+    quantity: 1,
+    startDate: '2023-10-01',
+    nextDeliveryDate: '2023-12-01',
+    status: 'active',
+    price: 85.00,
+  },
+];
+
+export const preOrders: PreOrder[] = [
+  {
+    id: 'preorder1',
+    productId: 'prod-new-1',
+    productName: 'Limited Edition Winter Collection',
+    customerId: 'customer1',
+    quantity: 1,
+    expectedReleaseDate: '2023-12-15',
+    depositAmount: 50.00,
+    totalAmount: 299.99,
+    status: 'confirmed',
+    createdAt: '2023-11-01',
+  },
+];
+
+export const supportTickets: SupportTicket[] = [
+  {
+    id: 'ticket1',
+    customerId: 'customer1',
+    subject: 'Order delivery inquiry',
+    category: 'shipping',
+    priority: 'medium',
+    status: 'open',
+    messages: [
+      {
+        id: 'msg1',
+        ticketId: 'ticket1',
+        senderId: 'customer1',
+        senderName: 'Sarah Johnson',
+        senderType: 'customer',
+        content: 'I placed an order last week and haven\'t received a tracking number yet. Can you help?',
+        createdAt: '2023-11-05T10:00:00Z',
+      },
+    ],
+    createdAt: '2023-11-05T10:00:00Z',
+    updatedAt: '2023-11-05T10:00:00Z',
+  },
+];
+
+export const returnRequests: ReturnRequest[] = [
+  {
+    id: 'return1',
+    orderId: 'ord1',
+    productId: 'prod1',
+    productName: 'Elegant Silk Gown',
+    customerId: 'customer1',
+    reason: 'Size doesn\'t fit',
+    status: 'pending',
+    requestedAt: '2023-11-06',
+    refundAmount: 299.99,
+  },
+];
+
+export const productBundles: ProductBundle[] = [
+  {
+    id: 'bundle1',
+    name: 'Complete Evening Look',
+    description: 'Everything you need for a perfect evening out',
+    products: [products[0], products[4], products[2]], // Gown, Earrings, Bag
+    bundlePrice: 399.99,
+    discount: 20,
+    imageUrl: products[0].imageUrl,
+    category: 'Bundles',
+  },
+  {
+    id: 'bundle2',
+    name: 'Casual Chic Collection',
+    description: 'Effortless style for everyday elegance',
+    products: [products[1], products[3], products[6]], // Trench, Sweater, Sneakers
+    bundlePrice: 299.50,
+    discount: 15,
+    imageUrl: products[1].imageUrl,
+    category: 'Bundles',
   },
 ];
 

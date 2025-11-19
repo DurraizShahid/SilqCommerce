@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Package, LayoutDashboard, ListOrdered, Tag } from 'lucide-react';
+import { Package, LayoutDashboard, ListOrdered, Tag, BarChart3, Store, Users, FileText, Settings, Zap, Key } from 'lucide-react';
 import { H2 } from '@/components/ui/typography';
 
 const AdminSidebar: React.FC = () => {
@@ -10,8 +10,19 @@ const AdminSidebar: React.FC = () => {
   const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Products', href: '/admin/products', icon: Package },
+    { name: 'Product Approval', href: '/admin/product-approval', icon: Package },
     { name: 'Categories', href: '/admin/categories', icon: Tag },
     { name: 'Orders', href: '/admin/orders', icon: ListOrdered },
+    { name: 'Vendors', href: '/admin/vendors', icon: Store },
+    { name: 'Users', href: '/admin/users', icon: Users },
+    { name: 'Content', href: '/admin/content', icon: FileText },
+    { name: 'Reports', href: '/admin/reports', icon: FileText },
+    { name: 'Settings', href: '/admin/settings', icon: Settings },
+    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+    { name: 'Advanced Analytics', href: '/admin/advanced-analytics', icon: BarChart3 },
+    { name: 'Marketing Automation', href: '/admin/marketing-automation', icon: Zap },
+    { name: 'Disputes', href: '/admin/disputes', icon: FileText },
+    { name: 'API Management', href: '/admin/api', icon: Key },
   ];
 
   return (

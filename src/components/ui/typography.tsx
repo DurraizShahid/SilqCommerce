@@ -18,6 +18,12 @@ export const H2: React.FC<TypographyProps> = ({ children, className }) => (
   </h2>
 );
 
+export const H3: React.FC<TypographyProps> = ({ children, className }) => (
+  <h3 className={cn("scroll-m-20 text-2xl font-semibold tracking-tight", className)}>
+    {children}
+  </h3>
+);
+
 export const P: React.FC<TypographyProps> = ({ children, className }) => (
   <p className={cn("leading-7 [&:not(:first-child)]:mt-6", className)}>
     {children}

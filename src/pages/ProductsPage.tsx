@@ -5,18 +5,22 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import { X, Search, Eye } from 'lucide-react';
+import { X, Search, Eye, Heart } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import ProductQuickView from '@/components/ProductQuickView';
 import { Product } from '@/data/dummyData';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import PaginationControls from '@/components/PaginationControls'; // Import PaginationControls
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { useCurrency } from '@/context/CurrencyContext';
+import PaginationControls from '@/components/PaginationControls';
+import { useWishlist } from '@/context/WishlistContext';
+import { useComparison } from '@/context/ComparisonContext';
+import { GitCompare, TrendingUp, Sparkles } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AdvancedSearchFilters from '@/components/AdvancedSearchFilters';
+import { vendors } from '@/data/dummyData';
+import { toast } from 'sonner';
 
 const PRODUCTS_PER_PAGE = 8; // Define how many products per page
 
@@ -28,23 +32,51 @@ const ProductsPage: React.FC = () => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [selectedProductForQuickView, setSelectedProductForQuickView] = useState<Product | null>(null);
   const [sortOrder, setSortOrder] = useState<string>('default');
-  const [currentPage, setCurrentPage] = useState(1); // New state for current page
+  const [currentPage, setCurrentPage] = useState(1);
+  const { addToWishlist, isInWishlist } = useWishlist();
+  const { addToComparison, isInComparison, canAddMore, comparisonProducts: comparisonItems } = useComparison();
+  const { formatPrice } = useCurrency();
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('all');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
+  const [ratingFilter, setRatingFilter] = useState<number | null>(null);
+
+  const maxPrice = useMemo(() => Math.ceil(Math.max(...products.map((product) => product.price))), []);
 
   // Reset search term, sort order, and current page when category changes
   useEffect(() => {
     setSearchTerm('');
     setSortOrder('default');
-    setCurrentPage(1); // Reset to first page on category change
+    setCurrentPage(1);
   }, [selectedCategory]);
+
+  useEffect(() => {
+    if (priceRange[1] === 0) {
+      setPriceRange([0, maxPrice]);
+    }
+  }, [maxPrice, priceRange]);
 
   const filteredAndSortedProducts = useMemo(() => {
     let currentProducts = products.filter((product) => {
-      const matchesCategory = selectedCategory
+      const matchesCategoryFilter = selectedCategory
         ? product.category === selectedCategory
         : true;
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             product.description.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesCategory && matchesSearch;
+      const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
+      const matchesStock = inStockOnly ? product.stock > 0 : true;
+      const matchesAdvancedCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
+      const matchesVendor = selectedVendors.length === 0 || (product.vendorId && selectedVendors.some(v => vendors.find(vd => vd.id === product.vendorId)?.name === v));
+      const matchesTab = activeTab === 'all'
+        ? true 
+        : activeTab === 'trending' 
+          ? product.isTrending === true
+          : activeTab === 'new'
+            ? product.isNew === true
+            : true;
+      return matchesCategoryFilter && matchesSearch && matchesPrice && matchesStock && matchesTab && matchesAdvancedCategory && matchesVendor;
     });
 
     // Apply sorting
@@ -66,7 +98,7 @@ const ProductsPage: React.FC = () => {
         break;
     }
     return currentProducts;
-  }, [products, selectedCategory, searchTerm, sortOrder]);
+          }, [products, selectedCategory, searchTerm, sortOrder, priceRange, inStockOnly, activeTab, selectedCategories, selectedVendors]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredAndSortedProducts.length / PRODUCTS_PER_PAGE);
@@ -95,6 +127,20 @@ const ProductsPage: React.FC = () => {
         </P>
       </div>
 
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="all">All Products</TabsTrigger>
+          <TabsTrigger value="trending">
+            <TrendingUp className="h-4 w-4 mr-2" />
+            Trending
+          </TabsTrigger>
+          <TabsTrigger value="new">
+            <Sparkles className="h-4 w-4 mr-2" />
+            New Arrivals
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
         <div className="relative w-full sm:w-1/2 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -106,7 +152,7 @@ const ProductsPage: React.FC = () => {
             className="pl-9 pr-4 py-2 rounded-md border w-full"
           />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           {selectedCategory && (
             <Badge variant="secondary" className="text-lg px-4 py-2">
               Category: {selectedCategory}
@@ -130,6 +176,21 @@ const ProductsPage: React.FC = () => {
         </div>
       </div>
 
+              <AdvancedSearchFilters
+                priceRange={priceRange}
+                onPriceRangeChange={setPriceRange}
+                maxPrice={maxPrice}
+                inStockOnly={inStockOnly}
+                onInStockOnlyChange={setInStockOnly}
+                selectedCategories={selectedCategories}
+                onCategoriesChange={setSelectedCategories}
+                selectedVendors={selectedVendors}
+                onVendorsChange={setSelectedVendors}
+                ratingFilter={ratingFilter}
+                onRatingFilterChange={setRatingFilter}
+                onSaveSearch={() => toast.info('Search saved!')}
+              />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {paginatedProducts.length > 0 ? (
           paginatedProducts.map((product) => (
@@ -140,6 +201,20 @@ const ProductsPage: React.FC = () => {
                   alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                 />
+                <div className="absolute top-2 left-2 flex gap-2">
+                  {product.isNew && (
+                    <Badge className="bg-green-500 hover:bg-green-600">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      New
+                    </Badge>
+                  )}
+                  {product.isTrending && (
+                    <Badge className="bg-orange-500 hover:bg-orange-600">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      Trending
+                    </Badge>
+                  )}
+                </div>
               </div>
               <CardHeader className="flex-grow">
                 <CardTitle className="text-xl font-semibold">{product.name}</CardTitle>
@@ -149,7 +224,7 @@ const ProductsPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <P className="text-2xl font-bold text-accent-gold [&:not(:first-child)]:mt-0">
-                  ${product.price.toFixed(2)}
+                  {formatPrice(product.price)}
                 </P>
               </CardContent>
               <CardFooter className="flex flex-col gap-2">
@@ -159,11 +234,39 @@ const ProductsPage: React.FC = () => {
                 >
                   <Eye className="h-4 w-4 mr-2" /> Quick View
                 </Button>
+                <div className="flex gap-2 w-full">
+                  <Button
+                    type="button"
+                    variant={isInWishlist(product.id) ? "secondary" : "outline"}
+                    className="flex-1"
+                    onClick={() => addToWishlist(product)}
+                  >
+                    <Heart className={`h-4 w-4 mr-2 ${isInWishlist(product.id) ? "fill-current" : ""}`} />
+                    {isInWishlist(product.id) ? "Saved" : "Wishlist"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={isInComparison(product.id) ? "secondary" : "outline"}
+                    size="icon"
+                    onClick={() => addToComparison(product)}
+                    disabled={!canAddMore && !isInComparison(product.id)}
+                    title={isInComparison(product.id) ? "In comparison" : "Add to comparison"}
+                  >
+                    <GitCompare className="h-4 w-4" />
+                  </Button>
+                </div>
                 <Link to={`/products/${product.id}`} className="w-full">
                   <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/10">
                     View Details
                   </Button>
                 </Link>
+                {comparisonItems.length > 0 && (
+                  <Link to="/compare" className="w-full">
+                    <Button variant="outline" className="w-full text-sm">
+                      View Comparison ({comparisonItems.length})
+                    </Button>
+                  </Link>
+                )}
               </CardFooter>
             </Card>
           ))

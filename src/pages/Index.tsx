@@ -1,11 +1,19 @@
-import { MadeWithDyad } from "@/components/made-with-dyad";
 import { H1, P, H2 } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { products, categories } from "@/data/dummyData";
+import { products, categories, productBundles } from "@/data/dummyData";
+import { useCurrency } from "@/context/CurrencyContext";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import RecentlyViewedProducts from "@/components/RecentlyViewedProducts";
+import ProductBundleCard from "@/components/ProductBundleCard";
+import NewArrivalsFeed from "@/components/NewArrivalsFeed";
+import AIProductRecommendations from "@/components/AIProductRecommendations";
+import { useAuth } from "@/context/AuthContext";
+import { Sparkles } from "lucide-react";
 
 const Index = () => {
+  const { formatPrice } = useCurrency();
+  const { isAuthenticated } = useAuth();
   const featuredProducts = products.slice(0, 3); // Get first 3 products as featured
 
   const getCategoryImageUrl = (categoryName: string) => {
@@ -25,11 +33,21 @@ const Index = () => {
           <P className="text-xl mb-8">
             Curated collections for the modern individual. Experience luxury in every detail.
           </P>
-          <Link to="/products">
-            <Button size="lg" className="bg-accent-gold text-accent-gold-foreground hover:bg-accent-gold/90 text-lg px-8 py-6">
-              Shop The Collection
-            </Button>
-          </Link>
+          <div className="flex gap-4 justify-center">
+            <Link to="/products">
+              <Button size="lg" className="bg-accent-gold text-accent-gold-foreground hover:bg-accent-gold/90 text-lg px-8 py-6">
+                Shop The Collection
+              </Button>
+            </Link>
+            {isAuthenticated && (
+              <Link to="/personalized">
+                <Button size="lg" variant="outline" className="bg-white/10 text-white border-white hover:bg-white/20 text-lg px-8 py-6">
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  Personalized View
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </section>
 
@@ -57,7 +75,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <P className="text-3xl font-bold text-accent-gold [&:not(:first-child)]:mt-0">
-                  ${product.price.toFixed(2)}
+                  {formatPrice(product.price)}
                 </P>
               </CardContent>
               <CardFooter>
@@ -108,7 +126,37 @@ const Index = () => {
         </Link>
       </section>
 
-      <MadeWithDyad />
+      {/* Product Bundles Section */}
+      {productBundles.length > 0 && (
+        <section className="text-center space-y-8">
+          <H2 className="text-4xl font-bold">Special Bundles</H2>
+          <P className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Curated collections at exclusive bundle prices.
+          </P>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {productBundles.map((bundle) => (
+              <ProductBundleCard key={bundle.id} bundle={bundle} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* AI Recommendations for Authenticated Users */}
+      {isAuthenticated && (
+        <section>
+          <AIProductRecommendations type="personalized" limit={8} title="Recommended For You" />
+        </section>
+      )}
+
+      {/* New Arrivals Feed */}
+      <section>
+        <NewArrivalsFeed />
+      </section>
+
+      {/* Recently Viewed Section */}
+      <section>
+        <RecentlyViewedProducts />
+      </section>
     </div>
   );
 };

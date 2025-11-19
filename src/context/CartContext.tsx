@@ -6,12 +6,20 @@ interface CartItem extends Product {
   quantity: number;
 }
 
+interface SavedForLaterItem extends Product {
+  savedAt: string;
+}
+
 interface CartContextType {
   cartItems: CartItem[];
+  savedForLater: SavedForLaterItem[];
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+  saveForLater: (productId: string) => void;
+  moveToCart: (productId: string) => void;
+  removeFromSaved: (productId: string) => void;
   cartTotal: number;
   cartItemCount: number;
 }
@@ -20,6 +28,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [savedForLater, setSavedForLater] = useState<SavedForLaterItem[]>([]);
 
   const addToCart = (product: Product, quantityToAdd: number = 1) => {
     setCartItems((prevItems) => {
@@ -80,6 +89,35 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     toast.info("Cart cleared.");
   };
 
+  const saveForLater = (productId: string) => {
+    const item = cartItems.find((item) => item.id === productId);
+    if (item) {
+      setCartItems(cartItems.filter((item) => item.id !== productId));
+      setSavedForLater([
+        ...savedForLater,
+        { ...item, savedAt: new Date().toISOString() },
+      ]);
+      toast.success(`${item.name} saved for later.`);
+    }
+  };
+
+  const moveToCart = (productId: string) => {
+    const item = savedForLater.find((item) => item.id === productId);
+    if (item) {
+      setSavedForLater(savedForLater.filter((item) => item.id !== productId));
+      addToCart(item, 1);
+      toast.success(`${item.name} moved to cart.`);
+    }
+  };
+
+  const removeFromSaved = (productId: string) => {
+    const item = savedForLater.find((item) => item.id === productId);
+    if (item) {
+      setSavedForLater(savedForLater.filter((item) => item.id !== productId));
+      toast.info(`${item.name} removed from saved items.`);
+    }
+  };
+
   const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   const cartItemCount = cartItems.reduce((count, item) => count + item.quantity, 0);
 
@@ -87,10 +125,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <CartContext.Provider
       value={{
         cartItems,
+        savedForLater,
         addToCart,
         removeFromCart,
         updateQuantity,
         clearCart,
+        saveForLater,
+        moveToCart,
+        removeFromSaved,
         cartTotal,
         cartItemCount,
       }}

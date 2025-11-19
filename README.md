@@ -1,1 +1,3 @@
-# Welcome to your Dyad app
+# SilqCommerce
+
+A modern luxury e-commerce platform.
