@@ -182,14 +182,14 @@ const ProductReviewsSection: React.FC<{ product: Product }> = ({ product }) => {
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4" />
             <Select
-              value={filterRating?.toString() || ''}
-              onValueChange={(value) => setFilterRating(value ? parseInt(value) : null)}
+              value={filterRating === null ? 'all' : filterRating.toString()}
+              onValueChange={(value) => setFilterRating(value === 'all' ? null : parseInt(value))}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by rating" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Ratings</SelectItem>
+                <SelectItem value="all">All Ratings</SelectItem>
                 <SelectItem value="5">5 Stars</SelectItem>
                 <SelectItem value="4">4 Stars</SelectItem>
                 <SelectItem value="3">3 Stars</SelectItem>

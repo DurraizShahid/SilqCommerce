@@ -8,7 +8,7 @@ import { useWishlist } from '@/context/WishlistContext';
 import { useComparison } from '@/context/ComparisonContext';
 import { useRecentlyViewed } from '@/context/RecentlyViewedContext';
 import { useCurrency } from '@/context/CurrencyContext';
-import { Heart, GitCompare, Zap } from 'lucide-react';
+import { Heart, GitCompare } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
 import ProductVariantSelector from '@/components/ProductVariantSelector';
@@ -22,6 +22,8 @@ import SizePrediction from '@/components/SizePrediction';
 import SocialShareButtons from '@/components/SocialShareButtons';
 import SubscriptionPreOrderOptions from '@/components/SubscriptionPreOrderOptions';
 import { useAuth } from '@/context/AuthContext';
+import EcoFriendlyBadge from '@/components/sustainability/EcoFriendlyBadge';
+import SustainabilityScore from '@/components/sustainability/SustainabilityScore';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,27 +58,8 @@ const ProductDetailPage: React.FC = () => {
     );
   }
 
-  useEffect(() => {
-    // Check if user has one-click purchase enabled (would come from user settings)
-    // For now, check if authenticated
-    setIsOneClickEnabled(isAuthenticated);
-  }, [isAuthenticated]);
-
   const handleAddToCart = () => {
     addToCart(product);
-  };
-
-  const handleOneClickPurchase = () => {
-    if (!isAuthenticated) {
-      toast.error('Please sign in to use one-click purchase');
-      return;
-    }
-    // Add to cart and redirect to checkout
-    addToCart(product);
-    toast.success('Redirecting to checkout...');
-    setTimeout(() => {
-      window.location.href = '/checkout';
-    }, 500);
   };
 
   return (
