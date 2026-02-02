@@ -37,8 +37,8 @@ const UserProfilePage: React.FC = () => {
     name: 'Sarah Johnson',
     username: '@sarahj',
     bio: 'Fashion enthusiast and luxury collector. Sharing my favorite finds and style inspiration.',
-    avatar: undefined,
-    coverImage: undefined,
+    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
+    coverImage: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=80',
     location: 'New York, NY',
     website: 'https://sarahj.com',
     joinDate: '2023-01-15',
@@ -55,8 +55,11 @@ const UserProfilePage: React.FC = () => {
   const userProducts = products.slice(0, 6);
   const userCollections = [
     { id: 'c1', name: 'Summer Essentials', count: 12, image: products[0].images[0] },
-    { id: 'c2', name: 'Luxury Bags', count: 8, image: products[1].images[0] },
-    { id: 'c3', name: 'Designer Dresses', count: 15, image: products[2].images[0] },
+    { id: 'c2', name: 'Luxury Bags', count: 8, image: products[2].images[0] },
+    { id: 'c3', name: 'Designer Dresses', count: 15, image: products[1].images[0] },
+    { id: 'c4', name: 'Modern Outerwear', count: 9, image: products[3].images[1] || products[3].images[0] },
+    { id: 'c5', name: 'Minimalist Jewelry', count: 6, image: products[8].images[0] },
+    { id: 'c6', name: 'Sneaker Edit', count: 5, image: products[6].images[1] || products[6].images[0] },
   ];
 
   // Mock activity

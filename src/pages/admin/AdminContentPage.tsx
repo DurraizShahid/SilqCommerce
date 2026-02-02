@@ -74,6 +74,28 @@ const AdminContentPage: React.FC = () => {
       endDate: '2023-12-31',
       createdAt: '2023-10-28',
     },
+    {
+      id: 'b3',
+      title: 'Winter Luxe Edit',
+      imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop',
+      linkUrl: '/products?category=Outerwear',
+      position: 'homepage-top',
+      isActive: true,
+      startDate: '2023-12-01',
+      endDate: '2024-01-15',
+      createdAt: '2023-11-28',
+    },
+    {
+      id: 'b4',
+      title: 'Accessories Spotlight',
+      imageUrl: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=2070&auto=format&fit=crop',
+      linkUrl: '/products?category=Accessories',
+      position: 'homepage-middle',
+      isActive: true,
+      startDate: '2023-11-10',
+      endDate: '2024-01-10',
+      createdAt: '2023-11-05',
+    },
   ]);
 
   const [collections, setCollections] = useState<Collection[]>([
@@ -94,6 +116,24 @@ const AdminContentPage: React.FC = () => {
       productIds: ['prod4', 'prod5'],
       isFeatured: false,
       createdAt: '2023-11-01',
+    },
+    {
+      id: 'c3',
+      name: 'Modern Tailoring',
+      description: 'Clean lines and sharp silhouettes for everyday luxury',
+      imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=2070&auto=format&fit=crop',
+      productIds: ['prod6', 'prod8', 'prod10'],
+      isFeatured: true,
+      createdAt: '2023-11-12',
+    },
+    {
+      id: 'c4',
+      name: 'City Essentials',
+      description: 'Versatile pieces designed for the modern city wardrobe',
+      imageUrl: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=2070&auto=format&fit=crop',
+      productIds: ['prod1', 'prod7', 'prod9'],
+      isFeatured: false,
+      createdAt: '2023-11-18',
     },
   ]);
 
